@@ -37,9 +37,68 @@
 #include "hexdump.c"
 #include "util.h"
 
+#define BITMAIN_CALC_DIFF1	1
+
+#ifdef WIN32
+#define BITMAIN_TEST
+#endif
+
+#define BITMAIN_TEST_PRINT_WORK 0
+#ifdef BITMAIN_TEST
+#define BITMAIN_TEST_NUM 19
+#define BITMAIN_TEST_USENUM 1
+int g_test_index = 0;
+const char btm_work_test_data[BITMAIN_TEST_NUM][256] = {
+		"00000002ddc1ce5579dbec17f17fbb8f31ae218a814b2a0c1900f0d90000000100000000b58aa6ca86546b07a5a46698f736c7ca9c0eedc756d8f28ac33c20cc24d792675276f879190afc85b6888022000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b190000000000000000eb2d45233c5b02de50ddcb9049ba16040e0ba00e9750a474eec75891571d925b52dfda4a190266667145b02f000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b19000000000000000090c7d3743e0b0562e4f56d3dd35cece3c5e8275d0abb21bf7e503cb72bd7ed3b52dfda4a190266667bbb58d7000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b1900000000000000006e0561da06022bfbb42c5ecd74a46bfd91934f201b777e9155cc6c3674724ec652dfda4a19026666a0cd827b000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b1900000000000000000312f42ce4964cc23f2d8c039f106f25ddd58e10a1faed21b3bba4b0e621807b52dfda4a1902666629c9497d000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b19000000000000000033093a6540dbe8f7f3d19e3d2af05585ac58dafad890fa9a942e977334a23d6e52dfda4a190266665ae95079000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b190000000000000000bd7893057d06e69705bddf9a89c7bac6b40c5b32f15e2295fc8c5edf491ea24952dfda4a190266664b89b4d3000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b19000000000000000075e66f533e53837d14236a793ee4e493985642bc39e016b9e63adf14a584a2aa52dfda4a19026666ab5d638d000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b190000000000000000d936f90c5db5f0fe1d017344443854fbf9e40a07a9b7e74fedc8661c23162bff52dfda4a19026666338e79cb000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b190000000000000000d2c1a7d279a4355b017bc0a4b0a9425707786729f21ee18add3fda4252a31a4152dfda4a190266669bc90806000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b190000000000000000ad36d19f33d04ca779942843890bc3b083cec83a4b60b6c45cf7d21fc187746552dfda4a1902666675d81ab7000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b19000000000000000093b809cf82b76082eacb55bc35b79f31882ed0976fd102ef54783cd24341319b52dfda4a1902666642ab4e42000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b1900000000000000007411ff315430a7bbf41de8a685d457e82d5177c05640d6a4436a40f39e99667852dfda4a190266662affa4b5000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b1900000000000000001ad0db5b9e1e2b57c8d3654c160f5a51067521eab7e340a270639d97f00a3fa252dfda4a1902666601a47bb6000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b19000000000000000022e055c442c46bbe16df68603a26891f6e4cf85b90102b39fd7cadb602b4e34552dfda4a1902666695d33cea000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b1900000000000000009c8baf5a8a1e16de2d6ae949d5fec3ed751f10dcd4c99810f2ce08040fb9e31d52dfda4a19026666fe78849d000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b190000000000000000e5655532b414887f35eb4652bc7b11ebac12891f65bc08cbe0ce5b277b9e795152dfda4a19026666fcc0d1d1000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b190000000000000000f272c5508704e2b62dd1c30ea970372c40bf00f9203f9bf69d456b4a7fbfffe352dfda4a19026666c03d4399000000800000000000000000000000000000000000000000000000000000000000000000",
+		"0000000256ccc4c8aeae2b1e41490bc352893605f284e4be043f7b190000000000000000fca3b4531ba627ad9b0e23cdd84c888952c23810df196e9c6db0bcecba6a830952dfda4a19026666c14009cb000000800000000000000000000000000000000000000000000000000000000000000000"
+};
+const char btm_work_test_midstate[BITMAIN_TEST_NUM][256] = {
+		"2d8738e7f5bcf76dcb8316fec772e20e240cd58c88d47f2d3f5a6a9547ed0a35",
+		"d31b6ce09c0bfc2af6f3fe3a03475ebefa5aa191fa70a327a354b2c22f9692f1",
+		"84a8c8224b80d36caeb42eff2a100f634e1ff873e83fd02ef1306a34abef9dbe",
+		"059882159439b9b32968c79a93c5521e769dbea9d840f56c2a17b9ad87e530b8",
+		"17fa435d05012574f8f1da26994cc87b6cb9660b5e82072dc6a0881cec150a0d",
+		"92a28cc5ec4ba6a2688471dfe2032b5fe97c805ca286c503e447d6749796c6af",
+		"1677a03516d6e9509ac37e273d2482da9af6e077abe8392cdca6a30e916a7ae9",
+		"50bbe09f1b8ac18c97aeb745d5d2c3b5d669b6ac7803e646f65ac7b763a392d1",
+		"e46a0022ebdc303a7fb1a0ebfa82b523946c312e745e5b8a116b17ae6b4ce981",
+		"8f2f61e7f5b4d76d854e6d266acfff4d40347548216838ccc4ef3b9e43d3c9ea",
+		"0a450588ae99f75d676a08d0326e1ea874a3497f696722c78a80c7b6ee961ea6",
+		"3c4c0fc2cf040b806c51b46de9ec0dcc678a7cc5cf3eff11c6c03de3bc7818cc",
+		"f6c7c785ab5daddb8f98e5f854f2cb41879fcaf47289eb2b4196fefc1b28316f",
+		"005312351ccb0d0794779f5023e4335b5cad221accf0dfa3da7b881266fa9f5a",
+		"7b26d189c6bba7add54143179aadbba7ccaeff6887bd8d5bec9597d5716126e6",
+		"a4718f4c801e7ddf913a9474eb71774993525684ffea1915f767ab16e05e6889",
+		"6b6226a8c18919d0e55684638d33a6892a00d22492cc2f5906ca7a4ac21c74a7",
+		"383114dccd1cb824b869158aa2984d157fcb02f46234ceca65943e919329e697",
+		"d4d478df3016852b27cb1ae9e1e98d98617f8d0943bf9dc1217f47f817236222"
+};
+#endif
+
 char opt_bitmain_dev[256] = {0};
 bool opt_bitmain_hwerror = false;
+bool opt_bitmain_checkall = false;
+bool opt_bitmain_checkn2diff = false;
 bool opt_bitmain_dev_usb = true;
+bool opt_bitmain_beeper = true;
+bool opt_bitmain_tempoverctrl = true;
 int opt_bitmain_temp = BITMAIN_TEMP_TARGET;
 int opt_bitmain_overheat = BITMAIN_TEMP_OVERHEAT;
 int opt_bitmain_fan_min = BITMAIN_DEFAULT_FAN_MIN_PWM;
@@ -290,12 +349,14 @@ static bool get_options(int this_option_offset, int *baud, int *chain_num,
 static int bitmain_set_txconfig(struct bitmain_txconfig_token *bm,
 			    uint8_t reset, uint8_t fan_eft, uint8_t timeout_eft, uint8_t frequency_eft,
 			    uint8_t voltage_eft, uint8_t chain_check_time_eft, uint8_t chip_config_eft, uint8_t hw_error_eft,
+			    uint8_t beeper_ctrl, uint8_t temp_over_ctrl,
 			    uint8_t chain_num, uint8_t asic_num, uint8_t fan_pwm_data, uint8_t timeout_data,
 			    uint16_t frequency, uint8_t voltage, uint8_t chain_check_time,
 			    uint8_t chip_address, uint8_t reg_address, uint8_t * reg_data)
 {
 	uint16_t crc = 0;
 	int datalen = 0;
+	uint8_t version = 0;
 	uint8_t * sendbuf = (uint8_t *)bm;
 	if (unlikely(!bm)) {
 		applog(LOG_WARNING, "bitmain_set_txconfig bitmain_txconfig_token is null");
@@ -312,7 +373,10 @@ static int bitmain_set_txconfig(struct bitmain_txconfig_token *bm,
 	memset(bm, 0, datalen);
 
 	bm->token_type = BITMAIN_TOKEN_TYPE_TXCONFIG;
-	bm->length = datalen-2;
+	bm->version = version;
+	bm->length = datalen-4;
+	bm->length = htole16(bm->length);
+
 	bm->reset = reset;
 	bm->fan_eft = fan_eft;
 	bm->timeout_eft = timeout_eft;
@@ -321,8 +385,11 @@ static int bitmain_set_txconfig(struct bitmain_txconfig_token *bm,
 	bm->chain_check_time_eft = chain_check_time_eft;
 	bm->chip_config_eft = chip_config_eft;
 	bm->hw_error_eft = hw_error_eft;
+	bm->beeper_ctrl = beeper_ctrl;
+	bm->temp_over_ctrl = temp_over_ctrl;
 
-	sendbuf[2] = htole8(sendbuf[2]);
+	sendbuf[4] = htole8(sendbuf[4]);
+	sendbuf[5] = htole8(sendbuf[5]);
 
 	bm->chain_num = chain_num;
 	bm->asic_num = asic_num;
@@ -340,29 +407,21 @@ static int bitmain_set_txconfig(struct bitmain_txconfig_token *bm,
 	crc = CRC16((uint8_t *)bm, datalen-2);
 	bm->crc = htole16(crc);
 
-	applog(LOG_ERR, "BTM TxConfigToken:reset(%d) faneft(%d) touteft(%d) freqeft(%d) volteft(%d) chainceft(%d) chipceft(%d) hweft(%d) mnum(%d) anum(%d) fanpwmdata(%d) toutdata(%d) freq(%d) volt(%d) chainctime(%d) regdata(%02x%02x%02x%02x) chipaddr(%02x) regaddr(%02x) crc(%04x)",
-					reset, fan_eft, timeout_eft, frequency_eft, voltage_eft,
-					chain_check_time_eft, chip_config_eft, hw_error_eft, chain_num, asic_num,
+	applog(LOG_ERR, "BTM TxConfigToken:v(%d) reset(%d) fan_e(%d) tout_e(%d) fq_e(%d) vt_e(%d) chainc_e(%d) chipc_e(%d) hw_e(%d) b_c(%d) t_c(%d) mnum(%d) anum(%d) fanpwmdata(%d) toutdata(%d) freq(%d) volt(%d) chainctime(%d) regdata(%02x%02x%02x%02x) chipaddr(%02x) regaddr(%02x) crc(%04x)",
+					version, reset, fan_eft, timeout_eft, frequency_eft, voltage_eft,
+					chain_check_time_eft, chip_config_eft, hw_error_eft, beeper_ctrl, temp_over_ctrl, chain_num, asic_num,
 					fan_pwm_data, timeout_data, frequency, voltage,
 					chain_check_time, reg_data[0], reg_data[1], reg_data[2], reg_data[3], chip_address, reg_address, crc);
 
 	return datalen;
 }
 
-#ifdef WIN32
-#define BITMAIN_TEST
-#endif
-
-#ifdef BITMAIN_TEST
-const char * btm_work_test_data = "00000002ddc1ce5579dbec17f17fbb8f31ae218a814b2a0c1900f0d90000000100000000b58aa6ca86546b07a5a46698f736c7ca9c0eedc756d8f28ac33c20cc24d792675276f879190afc85b6888022000000800000000000000000000000000000000000000000000000000000000000000000";
-const char * btm_work_test_midstate = "2d8738e7f5bcf76dcb8316fec772e20e240cd58c88d47f2d3f5a6a9547ed0a35";
-#endif
-
 static int bitmain_set_txtask(uint8_t * sendbuf,
 			    unsigned int * last_work_block, struct work **works, int work_array_size, int work_array, int sendworkcount, int * sendcount)
 {
 	uint16_t crc = 0;
 	uint32_t work_id = 0;
+	uint8_t version = 0;
 	int datalen = 0;
 	int i = 0;
 	int index = work_array;
@@ -371,6 +430,9 @@ static int bitmain_set_txtask(uint8_t * sendbuf,
 	struct bitmain_txtask_token *bm = (struct bitmain_txtask_token *)sendbuf;
 	*sendcount = 0;
 	int cursendcount = 0;
+	int diff = 0;
+	unsigned int difftmp = 0;
+	unsigned int pooldiff = 0;
 	if (unlikely(!bm)) {
 		applog(LOG_WARNING, "bitmain_set_txtask bitmain_txtask_token is null");
 		return -1;
@@ -382,6 +444,7 @@ static int bitmain_set_txtask(uint8_t * sendbuf,
 	memset(bm, 0, sizeof(struct bitmain_txtask_token));
 
 	bm->token_type = BITMAIN_TOKEN_TYPE_TXTASK;
+	bm->version = version;
 
 	datalen = 10;
 	applog(LOG_DEBUG, "BTM send work count %d -----", sendworkcount);
@@ -396,12 +459,17 @@ static int bitmain_set_txtask(uint8_t * sendbuf,
 				*last_work_block = works[index]->work_block;
 			}
 #ifdef BITMAIN_TEST
-			if(!hex2bin(works[index]->data, btm_work_test_data, 128)) {
+			if(!hex2bin(works[index]->data, btm_work_test_data[g_test_index], 128)) {
 				applog(LOG_DEBUG, "BTM send task set test data error");
 			}
-			if(!hex2bin(works[index]->midstate, btm_work_test_midstate, 32)) {
+			if(!hex2bin(works[index]->midstate, btm_work_test_midstate[g_test_index], 32)) {
 				applog(LOG_DEBUG, "BTM send task set test midstate error");
 			}
+			g_test_index++;
+			if(g_test_index >= BITMAIN_TEST_USENUM) {
+				g_test_index = 0;
+			}
+			applog(LOG_DEBUG, "BTM test index = %d", g_test_index);
 #endif
 			work_id = works[index]->id;
 			bm->works[cursendcount].work_id = htole32(work_id);
@@ -409,9 +477,27 @@ static int bitmain_set_txtask(uint8_t * sendbuf,
 			memcpy(bm->works[cursendcount].midstate, works[index]->midstate, 32);
 			memcpy(bm->works[cursendcount].data2, works[index]->data + 64, 12);
 
-			/*ob_hex = bin2hex(works[index]->data, 76);
-			applog(LOG_ERR, "work %d data: %s", works[index]->id, ob_hex);
-			free(ob_hex);*/
+			if(cursendcount == 0) {
+				pooldiff = (unsigned int)(works[index]->sdiff);
+				difftmp = pooldiff;
+				while(1) {
+					difftmp = difftmp >> 1;
+					if(difftmp > 0) {
+						diff++;
+						if(diff >= 255) {
+							break;
+						}
+					} else {
+						break;
+					}
+				}
+			}
+
+			if(BITMAIN_TEST_PRINT_WORK) {
+				ob_hex = bin2hex(works[index]->data, 76);
+				applog(LOG_ERR, "work %d data: %s", works[index]->id, ob_hex);
+				free(ob_hex);
+			}
 
 			cursendcount++;
 		}
@@ -429,6 +515,7 @@ static int bitmain_set_txtask(uint8_t * sendbuf,
 	//len = htole16(len);
 	//memcpy(sendbuf+1, &len, 2);
 	bm->new_block = new_block;
+	bm->diff = diff;
 
 	sendbuf[4] = htole8(sendbuf[4]);
 
@@ -441,8 +528,8 @@ static int bitmain_set_txtask(uint8_t * sendbuf,
 	crc = htole16(crc);
 	memcpy(sendbuf+datalen-2, &crc, 2);
 
-	applog(LOG_DEBUG, "BitMain TxTask Token: new_block(%d) work_num(%d) crc(%04x)",
-						new_block, cursendcount, crc);
+	applog(LOG_DEBUG, "BitMain TxTask Token: v(%d) new_block(%d) diff(%d pool:%d) work_num(%d) crc(%04x)",
+						version, new_block, diff, pooldiff, cursendcount, crc);
 	applog(LOG_DEBUG, "BitMain TxTask Token: %d %d %02x%02x%02x%02x%02x%02x",
 			datalen, bm->length, sendbuf[0],sendbuf[1],sendbuf[2],sendbuf[3],sendbuf[4],sendbuf[5]);
 
@@ -453,6 +540,7 @@ static int bitmain_set_rxstatus(struct bitmain_rxstatus_token *bm,
 		uint8_t chip_status_eft, uint8_t detect_get, uint8_t chip_address, uint8_t reg_address)
 {
 	uint16_t crc = 0;
+	uint8_t version = 0;
 	int datalen = 0;
 	uint8_t * sendbuf = (uint8_t *)bm;
 
@@ -465,12 +553,14 @@ static int bitmain_set_rxstatus(struct bitmain_rxstatus_token *bm,
 	memset(bm, 0, datalen);
 
 	bm->token_type = BITMAIN_TOKEN_TYPE_RXSTATUS;
-	bm->length = datalen-2;
+	bm->version = version;
+	bm->length = datalen-4;
+	bm->length = htole16(bm->length);
 
 	bm->chip_status_eft = chip_status_eft;
 	bm->detect_get = detect_get;
 
-	sendbuf[2] = htole8(sendbuf[2]);
+	sendbuf[4] = htole8(sendbuf[4]);
 
 	bm->chip_address = chip_address;
 	bm->reg_address = reg_address;
@@ -478,8 +568,8 @@ static int bitmain_set_rxstatus(struct bitmain_rxstatus_token *bm,
 	crc = CRC16((uint8_t *)bm, datalen-2);
 	bm->crc = htole16(crc);
 
-	applog(LOG_DEBUG, "BitMain RxStatus Token: chip_status_eft(%d) detect_get(%d) chip_address(%02x) reg_address(%02x) crc(%04x)",
-				chip_status_eft, detect_get, chip_address, reg_address, crc);
+	applog(LOG_ERR, "BitMain RxStatus Token: v(%d) chip_status_eft(%d) detect_get(%d) chip_address(%02x) reg_address(%02x) crc(%04x)",
+				version, chip_status_eft, detect_get, chip_address, reg_address, crc);
 
 	return datalen;
 }
@@ -487,7 +577,10 @@ static int bitmain_set_rxstatus(struct bitmain_rxstatus_token *bm,
 static int bitmain_parse_rxstatus(const uint8_t * data, int datalen, struct bitmain_rxstatus_data *bm)
 {
 	uint16_t crc = 0;
-	int i = 0;
+	uint8_t version = 0;
+	int i = 0, j = 0;
+	int asic_num = 0;
+	int dataindex = 0;
 	if (unlikely(!bm)) {
 		applog(LOG_WARNING, "bitmain_parse_rxstatus bitmain_rxstatus_data is null");
 		return -1;
@@ -496,13 +589,19 @@ static int bitmain_parse_rxstatus(const uint8_t * data, int datalen, struct bitm
 		applog(LOG_WARNING, "bitmain_parse_rxstatus parameter invalid data is null or datalen(%d) error", datalen);
 		return -1;
 	}
-	memcpy(bm, data, sizeof(struct bitmain_rxstatus_data));
+	memset(bm, 0, sizeof(struct bitmain_rxstatus_data));
+	memcpy(bm, data, 28);
 	if (bm->data_type != BITMAIN_DATA_TYPE_RXSTATUS) {
 		applog(LOG_ERR, "bitmain_parse_rxstatus datatype(%02x) error", bm->data_type);
 		return -1;
 	}
-	if (bm->length+2 != datalen) {
-		applog(LOG_ERR, "bitmain_parse_rxstatus length(%d) error", bm->length);
+	if (bm->version != version) {
+		applog(LOG_ERR, "bitmain_parse_rxstatus version(%02x) error", bm->version);
+		return -1;
+	}
+	bm->length = htole16(bm->length);
+	if (bm->length+4 != datalen) {
+		applog(LOG_ERR, "bitmain_parse_rxstatus length(%d) datalen(%d) error", bm->length, datalen);
 		return -1;
 	}
 	crc = CRC16(data, datalen-2);
@@ -512,36 +611,72 @@ static int bitmain_parse_rxstatus(const uint8_t * data, int datalen, struct bitm
 		applog(LOG_ERR, "bitmain_parse_rxstatus check crc(%d) != bm crc(%d) datalen(%d)", crc, bm->crc, datalen);
 		return -1;
 	}
-	bm->fifo_space = htole32(bm->fifo_space);
+	bm->fifo_space = htole16(bm->fifo_space);
+	bm->fan_exist = htole16(bm->fan_exist);
+	bm->temp_exist = htole32(bm->temp_exist);
 	bm->nonce_error = htole32(bm->nonce_error);
-	if(bm->chain_num*5 + bm->temp_num + bm->fan_num + 22 != datalen) {
-		applog(LOG_ERR, "bitmain_parse_rxstatus chain_num(%d) temp_num(%d) fan_num(%d) not match datalen(%d)",
-				bm->chain_num, bm->temp_num, bm->fan_num, datalen);
-		return -1;
-	}
 	if(bm->chain_num > BITMAIN_MAX_CHAIN_NUM) {
 		applog(LOG_ERR, "bitmain_parse_rxstatus chain_num=%d error", bm->chain_num);
 		return -1;
 	}
+	dataindex = 28;
 	if(bm->chain_num > 0) {
-		memcpy(bm->chain_asic_status, data+20, bm->chain_num*4);
-		memcpy(bm->chain_asic_num, data+20+bm->chain_num*4, bm->chain_num);
+		memcpy(bm->chain_asic_num, data+datalen-2-bm->chain_num-bm->temp_num-bm->fan_num, bm->chain_num);
+	}
+	for(i = 0; i < bm->chain_num; i++) {
+		asic_num = bm->chain_asic_num[i];
+		if(asic_num < 0) {
+			asic_num = 0;
+		} else {
+			if(asic_num % 32 == 0) {
+				asic_num = asic_num / 32;
+			} else {
+				asic_num = asic_num / 32 + 1;
+			}
+		}
+		memcpy((uint8_t *)bm->chain_asic_exist+i*32, data+dataindex, asic_num*4);
+		dataindex += asic_num*4;
+	}
+	for(i = 0; i < bm->chain_num; i++) {
+		asic_num = bm->chain_asic_num[i];
+		if(asic_num < 0) {
+			asic_num = 0;
+		} else {
+			if(asic_num % 32 == 0) {
+				asic_num = asic_num / 32;
+			} else {
+				asic_num = asic_num / 32 + 1;
+			}
+		}
+		memcpy((uint8_t *)bm->chain_asic_status+i*32, data+dataindex, asic_num*4);
+		dataindex += asic_num*4;
+	}
+	dataindex += bm->chain_num;
+	if(dataindex + bm->temp_num + bm->fan_num + 2 != datalen) {
+		applog(LOG_ERR, "bitmain_parse_rxstatus dataindex(%d) chain_num(%d) temp_num(%d) fan_num(%d) not match datalen(%d)",
+				dataindex, bm->chain_num, bm->temp_num, bm->fan_num, datalen);
+		return -1;
 	}
 	for(i = 0; i < bm->chain_num; i++) {
 		//bm->chain_asic_status[i] = swab32(bm->chain_asic_status[i]);
-		bm->chain_asic_status[i] = htole32(bm->chain_asic_status[i]);
+		for(j = 0; j < 8; j++) {
+			bm->chain_asic_exist[i*8+j] = htole32(bm->chain_asic_exist[i*8+j]);
+			bm->chain_asic_status[i*8+j] = htole32(bm->chain_asic_status[i*8+j]);
+		}
 	}
 	if(bm->temp_num > 0) {
-		memcpy(bm->temp, data+20+bm->chain_num*5, bm->temp_num);
+		memcpy(bm->temp, data+dataindex, bm->temp_num);
+		dataindex += bm->temp_num;
 	}
 	if(bm->fan_num > 0) {
-		memcpy(bm->fan, data+20+bm->chain_num*5+bm->temp_num, bm->fan_num);
+		memcpy(bm->fan, data+dataindex, bm->fan_num);
+		dataindex += bm->fan_num;
 	}
-	applog(LOG_DEBUG, "BitMain RxStatusData: chipvalueeft(%d) version(%d) fifospace(%d) regvalue(%d) chainnum(%d) tempnum(%d) fannum(%d) crc(%04x)",
-			bm->chip_value_eft, bm->version, bm->fifo_space, bm->reg_value, bm->chain_num, bm->temp_num, bm->fan_num, bm->crc);
+	applog(LOG_DEBUG, "BitMain RxStatusData: chipv_e(%d) chainnum(%d) fifos(%d) v1(%d) v2(%d) v3(%d) v4(%d) fann(%d) tempn(%d) fanet(%04x) tempet(%08x) ne(%d) regvalue(%d) crc(%04x)",
+			bm->chip_value_eft, bm->chain_num, bm->fifo_space, bm->hw_version[0], bm->hw_version[1], bm->hw_version[2], bm->hw_version[3], bm->fan_num, bm->temp_num, bm->fan_exist, bm->temp_exist, bm->nonce_error, bm->reg_value, bm->crc);
 	applog(LOG_DEBUG, "BitMain RxStatus Data chain info:");
 	for(i = 0; i < bm->chain_num; i++) {
-		applog(LOG_DEBUG, "BitMain RxStatus Data chain(%d) asic num=%d asic_status=%08x", i+1, bm->chain_asic_num[i], bm->chain_asic_status[i]);
+		applog(LOG_DEBUG, "BitMain RxStatus Data chain(%d) asic num=%d asic_exist=%08x asic_status=%08x", i+1, bm->chain_asic_num[i], bm->chain_asic_exist[i*8], bm->chain_asic_status[i*8]);
 	}
 	applog(LOG_DEBUG, "BitMain RxStatus Data temp info:");
 	for(i = 0; i < bm->temp_num; i++) {
@@ -558,6 +693,7 @@ static int bitmain_parse_rxnonce(const uint8_t * data, int datalen, struct bitma
 {
 	int i = 0;
 	uint16_t crc = 0;
+	uint8_t version = 0;
 	int curnoncenum = 0;
 	if (unlikely(!bm)) {
 		applog(LOG_ERR, "bitmain_parse_rxnonce bitmain_rxstatus_data null");
@@ -568,12 +704,16 @@ static int bitmain_parse_rxnonce(const uint8_t * data, int datalen, struct bitma
 		return -1;
 	}
 	memcpy(bm, data, sizeof(struct bitmain_rxnonce_data));
-
 	if (bm->data_type != BITMAIN_DATA_TYPE_RXNONCE) {
 		applog(LOG_ERR, "bitmain_parse_rxnonce datatype(%02x) error", bm->data_type);
 		return -1;
 	}
-	if (bm->length+2 != datalen) {
+	if (bm->version != version) {
+		applog(LOG_ERR, "bitmain_parse_rxnonce version(%02x) error", bm->version);
+		return -1;
+	}
+	bm->length = htole16(bm->length);
+	if (bm->length+4 != datalen) {
 		applog(LOG_ERR, "bitmain_parse_rxnonce length(%d) error", bm->length);
 		return -1;
 	}
@@ -584,8 +724,11 @@ static int bitmain_parse_rxnonce(const uint8_t * data, int datalen, struct bitma
 		applog(LOG_ERR, "bitmain_parse_rxnonce check crc(%d) != bm crc(%d) datalen(%d)", crc, bm->crc, datalen);
 		return -1;
 	}
-	curnoncenum = (datalen-4)/8;
-	applog(LOG_DEBUG, "BitMain RxNonce Data: nonce_num(%d-%d) fifo_space(%d)", curnoncenum, bm->nonce_num, bm->fifo_space);
+	bm->fifo_space = htole16(bm->fifo_space);
+	bm->diff = htole16(bm->diff);
+	bm->total_nonce_num = htole64(bm->total_nonce_num);
+	curnoncenum = (datalen-14)/8;
+	applog(LOG_DEBUG, "BitMain RxNonce Data: nonce_num(%d-%d) fifo_space(%d)", curnoncenum, bm->fifo_space);
 	for(i = 0; i < curnoncenum; i++) {
 		bm->nonces[i].work_id = htole32(bm->nonces[i].work_id);
 		bm->nonces[i].nonce = htole32(bm->nonces[i].nonce);
@@ -704,7 +847,7 @@ static int bitmain_send_data(const uint8_t * data, int datalen, struct cgpu_info
 	}
 
 	//cgsleep_prepare_r(&ts_start);
-	applog(LOG_DEBUG, "----bitmain_send_data  start");
+	//applog(LOG_DEBUG, "----bitmain_send_data  start");
 	ret = bitmain_write(bitmain, (char *)data, datalen, ep);
 	applog(LOG_DEBUG, "----bitmain_send_data  stop ret=%d datalen=%d", ret, datalen);
 	//cgsleep_us_r(&ts_start, delay);
@@ -719,8 +862,30 @@ static bool bitmain_decode_nonce(struct thr_info *thr, struct cgpu_info *bitmain
 {
 	info = bitmain->device_data;
 	//info->matching_work[work->subid]++;
-	applog(LOG_DEBUG, "BitMain: nonce = %08x", nonce);
-	return submit_nonce(thr, work, nonce);
+	if(opt_bitmain_hwerror) {
+		applog(LOG_DEBUG, "BitMain: submit direct nonce = %08x", nonce);
+		if(opt_bitmain_checkall) {
+			applog(LOG_DEBUG, "BitMain check all");
+			return submit_nonce(thr, work, nonce);
+		} else {
+			if(opt_bitmain_checkn2diff) {
+				int diff = 0;
+				diff = work->sdiff;
+				if(diff&&(diff&(diff-1))) {
+					applog(LOG_DEBUG, "BitMain %d not diff 2 submit_nonce", diff);
+					return submit_nonce(thr, work, nonce);
+				} else {
+					applog(LOG_DEBUG, "BitMain %d diff 2 submit_nonce_direct", diff);
+					return submit_nonce_direct(thr, work, nonce);
+				}
+			} else {
+				return submit_nonce_direct(thr, work, nonce);
+			}
+		}
+	} else {
+		applog(LOG_DEBUG, "BitMain: submit nonce = %08x", nonce);
+		return submit_nonce(thr, work, nonce);
+	}
 }
 
 static void bitmain_inc_nvw(struct bitmain_info *info, struct thr_info *thr)
@@ -735,11 +900,15 @@ static void bitmain_inc_nvw(struct bitmain_info *info, struct thr_info *thr)
 static inline void record_temp_fan(struct bitmain_info *info, struct bitmain_rxstatus_data *bm, float *temp_avg)
 {
 	int i = 0;
+	int maxfan = 0, maxtemp = 0;
 	*temp_avg = 0;
 
 	info->fan_num = bm->fan_num;
 	for(i = 0; i < bm->fan_num; i++) {
 		info->fan[i] = bm->fan[i] * BITMAIN_FAN_FACTOR;
+
+		if(info->fan[i] > maxfan)
+			maxfan = info->fan[i];
 	}
 	info->temp_num = bm->temp_num;
 	for(i = 0; i < bm->temp_num; i++) {
@@ -754,12 +923,16 @@ static inline void record_temp_fan(struct bitmain_info *info, struct bitmain_rxs
 		if(info->temp[i] > info->temp_max) {
 			info->temp_max = info->temp[i];
 		}
+		if(info->temp[i] > maxtemp)
+			maxtemp = info->temp[i];
 	}
 
 	if(bm->temp_num > 0) {
 		*temp_avg = *temp_avg / bm->temp_num;
 		info->temp_avg = *temp_avg;
 	}
+
+	inc_dev_status(maxfan, maxtemp);
 }
 
 static void bitmain_update_temps(struct cgpu_info *bitmain, struct bitmain_info *info,
@@ -809,55 +982,90 @@ static void bitmain_update_temps(struct cgpu_info *bitmain, struct bitmain_info 
 static void bitmain_parse_results(struct cgpu_info *bitmain, struct bitmain_info *info,
 				 struct thr_info *thr, uint8_t *buf, int *offset)
 {
-	int i, j, n, m, errordiff, spare = BITMAIN_READ_SIZE;
+	int i, j, n, m, r, errordiff, spare = BITMAIN_READ_SIZE;
 	uint32_t checkbit = 0x00000000;
 	bool found = false;
 	struct work *work = NULL;
 	char * ob_hex = NULL;
+	struct bitmain_packet_head packethead;
+	int asicnum = 0;
+	int idiff = 0;
 
 	for (i = 0; i <= spare; i++) {
 		if(buf[i] == 0xa1) {
 			struct bitmain_rxstatus_data rxstatusdata;
 			applog(LOG_DEBUG, "bitmain_parse_results RxStatus Data");
-			if(*offset < 2) {
+			if(*offset < 4) {
 				return;
 			}
-			if(buf[i+1] > 124) {
-				applog(LOG_ERR, "bitmain_parse_results bitmain_parse_rxstatus datalen=%d error", buf[i+1]+2);
+			memcpy(&packethead, buf+i, sizeof(struct bitmain_packet_head));
+			packethead.length = htole16(packethead.length);
+			if(packethead.length > 1130) {
+				applog(LOG_ERR, "bitmain_parse_results bitmain_parse_rxstatus datalen=%d error", packethead.length+4);
 				continue;
 			}
-			if(*offset < buf[i+1] + 2) {
+			if(*offset < packethead.length + 4) {
 				return;
 			}
-			if(bitmain_parse_rxstatus(buf+i, buf[i+1]+2, &rxstatusdata) != 0) {
-				applog(LOG_ERR, "bitmain_parse_results bitmain_parse_rxstatus error len=%d", buf[i+1]+2);
+			if(bitmain_parse_rxstatus(buf+i, packethead.length+4, &rxstatusdata) != 0) {
+				applog(LOG_ERR, "bitmain_parse_results bitmain_parse_rxstatus error len=%d", packethead.length+4);
 			} else {
 				mutex_lock(&info->qlock);
 				info->chain_num = rxstatusdata.chain_num;
 				info->fifo_space = rxstatusdata.fifo_space;
+				info->hw_version[0] = rxstatusdata.hw_version[0];
+				info->hw_version[1] = rxstatusdata.hw_version[1];
+				info->hw_version[2] = rxstatusdata.hw_version[2];
+				info->hw_version[3] = rxstatusdata.hw_version[3];
 				info->nonce_error = rxstatusdata.nonce_error;
 				errordiff = info->nonce_error-info->last_nonce_error;
-				applog(LOG_ERR, "bitmain_parse_results bitmain_parse_rxstatus version=%d chainnum=%d fifospace=%d nonceerror=%d-%d freq=%d chain info:",
-						rxstatusdata.version, info->chain_num, info->fifo_space, info->last_nonce_error, info->nonce_error, info->frequency);
+				applog(LOG_ERR, "bitmain_parse_results bitmain_parse_rxstatus version=%d chainnum=%d fifospace=%d hwv1=%d hwv2=%d hwv3=%d hwv4=%d nonceerror=%d-%d freq=%d chain info:",
+						rxstatusdata.version, info->chain_num, info->fifo_space, info->hw_version[0], info->hw_version[1], info->hw_version[2], info->hw_version[3],
+						info->last_nonce_error, info->nonce_error, info->frequency);
+				memcpy(info->chain_asic_exist, rxstatusdata.chain_asic_exist, BITMAIN_MAX_CHAIN_NUM*32);
+				memcpy(info->chain_asic_status, rxstatusdata.chain_asic_status, BITMAIN_MAX_CHAIN_NUM*32);
 				for(n = 0; n < rxstatusdata.chain_num; n++) {
 					info->chain_asic_num[n] = rxstatusdata.chain_asic_num[n];
-					info->chain_asic_status[n] = rxstatusdata.chain_asic_status[n];
-					memset(info->chain_asic_status_t[n], 0, 40);
+					memset(info->chain_asic_status_t[n], 0, 320);
 					j = 0;
-					for(m = 0; m < 32; m++) {
-						if(m%8 == 0 && m != 0) {
+
+					if(info->chain_asic_num[n] <= 0) {
+						asicnum = 0;
+					} else {
+						if(info->chain_asic_num[n] % 32 == 0) {
+							asicnum = info->chain_asic_num[n] / 32;
+						} else {
+							asicnum = info->chain_asic_num[n] / 32 + 1;
+						}
+					}
+					if(asicnum > 0) {
+						for(m = asicnum-1; m >= 0; m--) {
+							for(r = 0; r < 32; r++) {
+								if(r%8 == 0 && r != 0) {
+									info->chain_asic_status_t[n][j] = ' ';
+									j++;
+								}
+								checkbit = num2bit(r);
+								if(rxstatusdata.chain_asic_exist[n*8+m] & checkbit) {
+									if(rxstatusdata.chain_asic_status[n*8+m] & checkbit) {
+										info->chain_asic_status_t[n][j] = 'o';
+									} else {
+										info->chain_asic_status_t[n][j] = 'x';
+									}
+								} else {
+									info->chain_asic_status_t[n][j] = '-';
+								}
+								j++;
+							}
 							info->chain_asic_status_t[n][j] = ' ';
 							j++;
 						}
-						checkbit = num2bit(m);
-						if(rxstatusdata.chain_asic_status[n] & checkbit) {
-							info->chain_asic_status_t[n][j] = 'o';
-						} else {
-							info->chain_asic_status_t[n][j] = 'x';
-						}
-						j++;
 					}
-					applog(LOG_ERR, "bitmain_parse_rxstatus chain(%d) asic_num=%d asic_status=%08x-%s", n, info->chain_asic_num[n], info->chain_asic_status[n], info->chain_asic_status_t[n]);
+					applog(LOG_DEBUG, "bitmain_parse_results chain(%d) asic_num=%d asic_exist=%08x%08x%08x%08x%08x%08x%08x%08x asic_status=%08x%08x%08x%08x%08x%08x%08x%08x",
+						n, info->chain_asic_num[n],
+						info->chain_asic_exist[n*8+0], info->chain_asic_exist[n*8+1], info->chain_asic_exist[n*8+2], info->chain_asic_exist[n*8+3], info->chain_asic_exist[n*8+4], info->chain_asic_exist[n*8+5], info->chain_asic_exist[n*8+6], info->chain_asic_exist[n*8+7],
+						info->chain_asic_status[n*8+0], info->chain_asic_status[n*8+1], info->chain_asic_status[n*8+2], info->chain_asic_status[n*8+3], info->chain_asic_status[n*8+4], info->chain_asic_status[n*8+5], info->chain_asic_status[n*8+6], info->chain_asic_status[n*8+7]);
+					applog(LOG_ERR, "bitmain_parse_results chain(%d) asic_num=%d asic_status=%s", n, info->chain_asic_num[n], info->chain_asic_status_t[n]);
 				}
 				mutex_unlock(&info->qlock);
 
@@ -873,7 +1081,7 @@ static void bitmain_parse_results(struct cgpu_info *bitmain, struct bitmain_info
 			}
 
 			found = true;
-			spare = buf[i+1] + 2 + i;
+			spare = packethead.length + 4 + i;
 			if(spare > *offset) {
 				applog(LOG_ERR, "bitmain_parse_rxresults space(%d) > offset(%d)", spare, *offset);
 				spare = *offset;
@@ -883,42 +1091,58 @@ static void bitmain_parse_results(struct cgpu_info *bitmain, struct bitmain_info
 			struct bitmain_rxnonce_data rxnoncedata;
 			int nonce_num = 0;
 			applog(LOG_DEBUG, "bitmain_parse_results RxNonce Data");
-			if(*offset < 2) {
+			if(*offset < 4) {
 				return;
 			}
-			if(buf[i+1] > 70) {
-				applog(LOG_ERR, "bitmain_parse_results bitmain_parse_rxnonce datalen=%d error", buf[i+1]+2);
+			memcpy(&packethead, buf+i, sizeof(struct bitmain_packet_head));
+			packethead.length = htole16(packethead.length);
+			if(packethead.length > 1030) {
+				applog(LOG_ERR, "bitmain_parse_results bitmain_parse_rxnonce datalen=%d error", packethead.length+4);
 				continue;
 			}
-			if(*offset < buf[i+1] + 2) {
+			if(*offset < packethead.length + 4) {
 				return;
 			}
-			if(bitmain_parse_rxnonce(buf+i, buf[i+1]+2, &rxnoncedata, &nonce_num) != 0) {
-				applog(LOG_ERR, "bitmain_parse_results bitmain_parse_rxnonce error len=%d", buf[i+1]+2);
+			if(bitmain_parse_rxnonce(buf+i, packethead.length+4, &rxnoncedata, &nonce_num) != 0) {
+				applog(LOG_ERR, "bitmain_parse_results bitmain_parse_rxnonce error len=%d", packethead.length+4);
 			} else {
+				struct pool * pool = NULL;
 				for(j = 0; j < nonce_num; j++) {
 					work = clone_queued_work_byid(bitmain, rxnoncedata.nonces[j].work_id);
 					if(work) {
-						applog(LOG_DEBUG, "bitmain_parse_results nonce find work(%d-%d)(%08x)", work->id, rxnoncedata.nonces[j].work_id, rxnoncedata.nonces[j].nonce);
+						pool = work->pool;
+						if(BITMAIN_TEST_PRINT_WORK) {
+							applog(LOG_ERR, "bitmain_parse_results nonce find work(%d-%d)(%08x)", work->id, rxnoncedata.nonces[j].work_id, rxnoncedata.nonces[j].nonce);
 
-						/*ob_hex = bin2hex(work->midstate, 32);
-						applog(LOG_ERR, "work %d midstate: %s", work->id, ob_hex);
-						free(ob_hex);
+							ob_hex = bin2hex(work->midstate, 32);
+							applog(LOG_ERR, "work %d midstate: %s", work->id, ob_hex);
+							free(ob_hex);
 
-						ob_hex = bin2hex(work->data+64, 12);
-						applog(LOG_ERR, "work %d data2: %s", work->id, ob_hex);
-						free(ob_hex);*/
+							ob_hex = bin2hex(work->data+64, 12);
+							applog(LOG_ERR, "work %d data2: %s", work->id, ob_hex);
+							free(ob_hex);
+						}
 
 						if(work->work_block < info->last_work_block) {
 							applog(LOG_ERR, "BitMain: bitmain_parse_rxnonce work(%d) nonce stale", rxnoncedata.nonces[j].work_id);
 						} else {
 							if (bitmain_decode_nonce(thr, bitmain, info, rxnoncedata.nonces[j].nonce, work)) {
-						 		applog(LOG_DEBUG, "bitmain_decode_nonce info->qlock start");
-						 		mutex_lock(&info->qlock);
-						 		info->nonces++;
-								info->auto_nonces++;
-								mutex_unlock(&info->qlock);
-								applog(LOG_DEBUG, "bitmain_decode_nonce info->qlock stop");
+								cg_logwork_uint32(work, rxnoncedata.nonces[j].nonce, true);
+								if(opt_bitmain_hwerror) {
+#ifndef BITMAIN_CALC_DIFF1
+									mutex_lock(&info->qlock);
+									idiff = (int)work->sdiff;
+									info->nonces+=idiff;
+									info->auto_nonces+=idiff;
+									mutex_unlock(&info->qlock);
+									inc_work_status(thr, pool, idiff);
+#endif
+								} else {
+									mutex_lock(&info->qlock);
+									info->nonces++;
+									info->auto_nonces++;
+									mutex_unlock(&info->qlock);
+								}
 						 	} else {
 						 		//bitmain_inc_nvw(info, thr);
 						 		applog(LOG_ERR, "BitMain: bitmain_decode_nonce error work(%d)", rxnoncedata.nonces[j].work_id);
@@ -930,14 +1154,49 @@ static void bitmain_parse_results(struct cgpu_info *bitmain, struct bitmain_info
 						applog(LOG_ERR, "BitMain: Nonce not find work(%d)", rxnoncedata.nonces[j].work_id);
 					}
 				}
+#ifdef BITMAIN_CALC_DIFF1
+				if(opt_bitmain_hwerror) {
+					int difftmp = 0;
+					difftmp = rxnoncedata.diff;
+					idiff = 1;
+					while(difftmp > 0) {
+						difftmp--;
+						idiff << 1;
+					}
+					mutex_lock(&info->qlock);
+					difftmp = idiff*rxnoncedata.total_nonce_num-info->total_nonce_num;
+					if(difftmp < 0)
+						difftmp = 0;
+
+					info->nonces = info->nonces+difftmp;
+					info->auto_nonces = info->auto_nonces+difftmp;
+					info->total_nonce_num = idiff*rxnoncedata.total_nonce_num;
+					info->fifo_space = rxnoncedata.fifo_space;
+					mutex_unlock(&info->qlock);
+					inc_work_stats(thr, pool, difftmp);
+
+					applog(LOG_DEBUG, "bitmain_parse_rxnonce fifo space=%d diff=%d totalnoncenum=%lld", info->fifo_space, idiff, info->total_nonce_num);
+				} else {
+					mutex_lock(&info->qlock);
+					info->fifo_space = rxnoncedata.fifo_space;
+					mutex_unlock(&info->qlock);
+					applog(LOG_DEBUG, "bitmain_parse_rxnonce fifo space=%d", info->fifo_space);
+				}
+#else
 				mutex_lock(&info->qlock);
 				info->fifo_space = rxnoncedata.fifo_space;
-				applog(LOG_DEBUG, "bitmain_parse_rxnonce fifo space=%d", info->fifo_space);
 				mutex_unlock(&info->qlock);
+				applog(LOG_DEBUG, "bitmain_parse_rxnonce fifo space=%d", info->fifo_space);
+#endif
+
+#ifndef WIN32
+				if(nonce_num < BITMAIN_MAX_NONCE_NUM)
+					cgsleep_ms(5);
+#endif
 			}
 
  			found = true;
- 			spare = buf[i+1] + 2 + i;
+ 			spare = packethead.length + 4 + i;
  			if(spare > *offset) {
  				applog(LOG_ERR, "bitmain_parse_rxnonce space(%d) > offset(%d)", spare, *offset);
  				spare = *offset;
@@ -960,8 +1219,7 @@ static void bitmain_parse_results(struct cgpu_info *bitmain, struct bitmain_info
 	memmove(buf, buf + spare, *offset);
 }
 
-static void bitmain_running_reset(struct cgpu_info *bitmain,
-				   struct bitmain_info *info)
+static void bitmain_running_reset(struct cgpu_info *bitmain, struct bitmain_info *info)
 {
 	bitmain->results = 0;
 	info->reset = false;
@@ -984,12 +1242,12 @@ static void *bitmain_get_results(void *userdata)
 	while (likely(!bitmain->shutdown)) {
 		unsigned char buf[rsize];
 
-		applog(LOG_DEBUG, "+++++++bitmain_get_results offset=%d", offset);
+		//applog(LOG_DEBUG, "+++++++bitmain_get_results offset=%d", offset);
 
 		if (offset >= (int)BITMAIN_READ_SIZE) {
-			applog(LOG_DEBUG, "======start bitmain_get_results ");
+			//applog(LOG_DEBUG, "======start bitmain_get_results ");
 			bitmain_parse_results(bitmain, info, thr, readbuf, &offset);
-			applog(LOG_DEBUG, "======stop bitmain_get_results ");
+			//applog(LOG_DEBUG, "======stop bitmain_get_results ");
 		}
 
 		if (unlikely(offset + rsize >= BITMAIN_READBUF_SIZE)) {
@@ -1012,17 +1270,25 @@ static void *bitmain_get_results(void *userdata)
 		//}
 
 		//cgsleep_prepare_r(&ts_start);
-		applog(LOG_DEBUG, "======start bitmain_get_results bitmain_read");
+		//applog(LOG_DEBUG, "======start bitmain_get_results bitmain_read");
 		ret = bitmain_read(bitmain, buf, rsize, BITMAIN_READ_TIMEOUT, C_BITMAIN_READ);
-		applog(LOG_DEBUG, "======stop bitmain_get_results bitmain_read=%d", ret);
+		//applog(LOG_DEBUG, "======stop bitmain_get_results bitmain_read=%d", ret);
 
 		if (ret < 1) {
 			errorcount++;
-			if(errorcount > 100) {
-				applog(LOG_ERR, "bitmain_read errorcount ret=%d", ret);
+#ifdef WIN32
+			if(errorcount > 200) {
+				//applog(LOG_ERR, "bitmain_read errorcount ret=%d", ret);
 				cgsleep_ms(20);
 				errorcount = 0;
 			}
+#else
+			if(errorcount > 3) {
+				//applog(LOG_ERR, "bitmain_read errorcount ret=%d", ret);
+				cgsleep_ms(20);
+				errorcount = 0;
+			}
+#endif
 			continue;
 		}
 
@@ -1092,9 +1358,13 @@ static int bitmain_initialize(struct cgpu_info *bitmain)
 	int trycount = 3;
 	struct timespec p;
 	struct bitmain_rxstatus_data rxstatusdata;
-	int i = 0, j = 0, m = 0, statusok = 0;
+	int i = 0, j = 0, m = 0, r = 0, statusok = 0;
 	uint32_t checkbit = 0x00000000;
-	int eft = 0;
+	int hwerror_eft = 0;
+	int beeper_ctrl = 1;
+	int tempover_ctrl = 1;
+	struct bitmain_packet_head packethead;
+	int asicnum = 0;
 
 	/* Send reset, then check for result */
 	if(!bitmain) {
@@ -1135,44 +1405,77 @@ static int bitmain_initialize(struct cgpu_info *bitmain)
 							applog(LOG_DEBUG, "%s%d initset: get:", bitmain->drv->name, bitmain->device_id);
 							hexdump(data, readlen);
 						}
-						if(data[i+1] > 124) {
-							applog(LOG_ERR, "bitmain_initialize rxstatus datalen=%d error", data[i+1]+2);
+						memcpy(&packethead, data+i, sizeof(struct bitmain_packet_head));
+						packethead.length = htole16(packethead.length);
+
+						if(packethead.length > 1130) {
+							applog(LOG_ERR, "bitmain_initialize rxstatus datalen=%d error", packethead.length+4);
 							continue;
 						}
-						if(readlen-i < data[i+1]+2) {
-							applog(LOG_ERR, "bitmain_initialize rxstatus datalen=%d low", data[i+1]+2);
+						if(readlen-i < packethead.length+4) {
+							applog(LOG_ERR, "bitmain_initialize rxstatus datalen=%d<%d low", readlen-i, packethead.length+4);
 							continue;
 						}
-						if (bitmain_parse_rxstatus(data+i, data[i+1]+2, &rxstatusdata) != 0) {
+						if (bitmain_parse_rxstatus(data+i, packethead.length+4, &rxstatusdata) != 0) {
 							applog(LOG_ERR, "bitmain_initialize bitmain_parse_rxstatus error");
 							continue;
 						}
 						info->chain_num = rxstatusdata.chain_num;
 						info->fifo_space = rxstatusdata.fifo_space;
+						info->hw_version[0] = rxstatusdata.hw_version[0];
+						info->hw_version[1] = rxstatusdata.hw_version[1];
+						info->hw_version[2] = rxstatusdata.hw_version[2];
+						info->hw_version[3] = rxstatusdata.hw_version[3];
 						info->nonce_error = 0;
 						info->last_nonce_error = 0;
-						applog(LOG_ERR, "bitmain_initialize bitmain_parse_rxstatus version(%d) chain_num(%d) fifo_space(%d) nonce_error(%d) freq=%d",
-								rxstatusdata.version, info->chain_num, info->fifo_space, rxstatusdata.nonce_error, info->frequency);
+						applog(LOG_ERR, "bitmain_initialize bitmain_parse_rxstatus version(%d) chain_num(%d) fifo_space(%d) hwv1(%d) hwv2(%d) hwv3(%d) hwv4(%d) nonce_error(%d) freq=%d",
+								rxstatusdata.version, info->chain_num, info->fifo_space, info->hw_version[0], info->hw_version[1], info->hw_version[2], info->hw_version[3],
+								rxstatusdata.nonce_error, info->frequency);
+
+						memcpy(info->chain_asic_exist, rxstatusdata.chain_asic_exist, BITMAIN_MAX_CHAIN_NUM*32);
+						memcpy(info->chain_asic_status, rxstatusdata.chain_asic_status, BITMAIN_MAX_CHAIN_NUM*32);
 						for(i = 0; i < rxstatusdata.chain_num; i++) {
 							info->chain_asic_num[i] = rxstatusdata.chain_asic_num[i];
-							info->chain_asic_status[i] = rxstatusdata.chain_asic_status[i];
-							memset(info->chain_asic_status_t[i], 0, 40);
+							memset(info->chain_asic_status_t[i], 0, 320);
 							j = 0;
-							for(m = 0; m < 32; m++) {
-								if(m%8 == 0 && m != 0) {
+
+							if(info->chain_asic_num[i] <= 0) {
+								asicnum = 0;
+							} else {
+								if(info->chain_asic_num[i] % 32 == 0) {
+									asicnum = info->chain_asic_num[i] / 32;
+								} else {
+									asicnum = info->chain_asic_num[i] / 32 + 1;
+								}
+							}
+							if(asicnum > 0) {
+								for(m = asicnum-1; m >= 0; m--) {
+									for(r = 0; r < 32; r++) {
+										if(r%8 == 0 && r != 0) {
+											info->chain_asic_status_t[i][j] = ' ';
+											j++;
+										}
+										checkbit = num2bit(r);
+										if(rxstatusdata.chain_asic_exist[i*8+m] & checkbit) {
+											if(rxstatusdata.chain_asic_status[i*8+m] & checkbit) {
+												info->chain_asic_status_t[i][j] = 'o';
+											} else {
+												info->chain_asic_status_t[i][j] = 'x';
+											}
+										} else {
+											info->chain_asic_status_t[i][j] = '-';
+										}
+										j++;
+									}
 									info->chain_asic_status_t[i][j] = ' ';
 									j++;
 								}
-								checkbit = num2bit(m);
-								if(rxstatusdata.chain_asic_status[i] & checkbit) {
-									info->chain_asic_status_t[i][j] = 'o';
-								} else {
-									info->chain_asic_status_t[i][j] = 'x';
-								}
-								j++;
 							}
-							applog(LOG_ERR, "bitmain_initialize bitmain_parse_rxstatus chain(%d) asic_num=%d asic_status=%08x-%s",
-									i, info->chain_asic_num[i], info->chain_asic_status[i], info->chain_asic_status_t[i]);
+							applog(LOG_DEBUG, "bitmain_initialize chain(%d) asic_num=%d asic_exist=%08x%08x%08x%08x%08x%08x%08x%08x asic_status=%08x%08x%08x%08x%08x%08x%08x%08x",
+									i, info->chain_asic_num[i],
+									info->chain_asic_exist[i*8+0], info->chain_asic_exist[i*8+1], info->chain_asic_exist[i*8+2], info->chain_asic_exist[i*8+3], info->chain_asic_exist[i*8+4], info->chain_asic_exist[i*8+5], info->chain_asic_exist[i*8+6], info->chain_asic_exist[i*8+7],
+									info->chain_asic_status[i*8+0], info->chain_asic_status[i*8+1], info->chain_asic_status[i*8+2], info->chain_asic_status[i*8+3], info->chain_asic_status[i*8+4], info->chain_asic_status[i*8+5], info->chain_asic_status[i*8+6], info->chain_asic_status[i*8+7]);
+							applog(LOG_ERR, "bitmain_initialize chain(%d) asic_num=%d asic_status=%s", i, info->chain_asic_num[i], info->chain_asic_status_t[i]);
 						}
 						bitmain_update_temps(bitmain, info, &rxstatusdata);
 						statusok = 1;
@@ -1199,10 +1502,18 @@ static int bitmain_initialize(struct cgpu_info *bitmain)
 	if(statusok) {
 		applog(LOG_ERR, "bitmain_initialize start send txconfig");
 		if(opt_bitmain_hwerror)
-			eft = 1;
+			hwerror_eft = 1;
 		else
-			eft = 0;
-		sendlen = bitmain_set_txconfig((struct bitmain_txconfig_token *)sendbuf, 1, 1, 1, 1, 1, 0, 1, eft,
+			hwerror_eft = 0;
+		if(opt_bitmain_beeper)
+			beeper_ctrl = 1;
+		else
+			beeper_ctrl = 0;
+		if(opt_bitmain_tempoverctrl)
+			tempover_ctrl = 1;
+		else
+			tempover_ctrl = 0;
+		sendlen = bitmain_set_txconfig((struct bitmain_txconfig_token *)sendbuf, 1, 1, 1, 1, 1, 0, 1, hwerror_eft, beeper_ctrl, tempover_ctrl,
 				info->chain_num, info->asic_num, BITMAIN_DEFAULT_FAN_MAX_PWM, info->timeout,
 				info->frequency, BITMAIN_DEFAULT_VOLTAGE, 0, 0, 0x04, info->reg_data);
 		if(sendlen <= 0) {
@@ -1559,10 +1870,10 @@ static bool bitmain_fill(struct cgpu_info *bitmain)
 	struct timeval now;
 	int timediff = 0;
 
-	applog(LOG_DEBUG, "BTM bitmain_fill start--------");
+	//applog(LOG_DEBUG, "BTM bitmain_fill start--------");
 	mutex_lock(&info->qlock);
 	if(info->fifo_space <= 0) {
-		applog(LOG_DEBUG, "BTM bitmain_fill fifo space empty--------");
+		//applog(LOG_DEBUG, "BTM bitmain_fill fifo space empty--------");
 		ret = true;
 		goto out_unlock;
 	}
@@ -1572,7 +1883,7 @@ static bool bitmain_fill(struct cgpu_info *bitmain)
 		ret = false;
 	}
 	while(info->fifo_space > 0) {
-		neednum = info->fifo_space<8?info->fifo_space:8;
+		neednum = info->fifo_space<BITMAIN_MAX_WORK_NUM?info->fifo_space:BITMAIN_MAX_WORK_NUM;
 		queuednum = bitmain->queued;
 		applog(LOG_DEBUG, "BTM: Work task queued(%d) fifo space(%d) needsend(%d)", queuednum, info->fifo_space, neednum);
 		if(queuednum < neednum) {
@@ -1650,10 +1961,8 @@ out_unlock:
 	cgtime(&now);
 	timediff = now.tv_sec - info->last_status_time.tv_sec;
 	if(timediff < 0) timediff = -timediff;
-
-	if (now.tv_sec - info->last_status_time.tv_sec > BITMAIN_SEND_STATUS_TIME) {
-		applog(LOG_DEBUG, "BTM: Send RX Status Token fifo_space(%d) timediff(%d)",
-			info->fifo_space, timediff);
+	if (timediff > BITMAIN_SEND_STATUS_TIME) {
+		applog(LOG_DEBUG, "BTM: Send RX Status Token fifo_space(%d) timediff(%d)", info->fifo_space, timediff);
 		copy_time(&(info->last_status_time), &now);
 
 		sendlen = bitmain_set_rxstatus((struct bitmain_rxstatus_token *) sendbuf, 0, 0, 0, 0);
@@ -1678,15 +1987,17 @@ out_unlock:
 			}
 		}
 	}
+
 	if(info->send_full_space > BITMAIN_SEND_FULL_SPACE) {
 		info->send_full_space = 0;
 		ret = true;
+		cgsleep_ms(1);
 	}
 	mutex_unlock(&info->qlock);
 	if(senderror) {
 		ret = true;
-		cgsleep_prepare_r(&ts_start);
-		cgsleep_ms_r(&ts_start, 50);
+		applog(LOG_DEBUG, "bitmain_fill send task sleep");
+		//cgsleep_ms(1);
 	}
 	return ret;
 }
@@ -1710,7 +2021,7 @@ static int64_t bitmain_scanhash(struct thr_info *thr)
 	abstime.tv_sec = then.tv_sec;
 	abstime.tv_nsec = then.tv_usec * 1000;
 
-	applog(LOG_DEBUG, "bitmain_scanhash info->qlock start");
+	//applog(LOG_DEBUG, "bitmain_scanhash info->qlock start");
 	mutex_lock(&info->qlock);
 	hash_count = 0xffffffffull * (uint64_t)info->nonces;
 	bitmain->results += info->nonces + info->idle;
@@ -1720,7 +2031,7 @@ static int64_t bitmain_scanhash(struct thr_info *thr)
 		bitmain->results--;
 	info->nonces = info->idle = 0;
 	mutex_unlock(&info->qlock);
-	applog(LOG_DEBUG, "bitmain_scanhash info->qlock stop");
+	//applog(LOG_DEBUG, "bitmain_scanhash info->qlock stop");
 
 	/* Check for nothing but consecutive bad results or consistently less
 	 * results than we should be getting and reset the FPGA if necessary */
@@ -1779,18 +2090,46 @@ static struct api_data *bitmain_api_stats(struct cgpu_info *cgpu)
 	root = api_add_int(root, "timeout", &(info->timeout), false);
 	root = api_add_int(root, "frequency", &(info->frequency), false);
 	root = api_add_int(root, "voltage", &(info->voltage), false);
+	root = api_add_int(root, "hwv1", &(info->hw_version[0]), false);
+	root = api_add_int(root, "hwv2", &(info->hw_version[1]), false);
+	root = api_add_int(root, "hwv3", &(info->hw_version[2]), false);
+	root = api_add_int(root, "hwv4", &(info->hw_version[3]), false);
 
 	root = api_add_int(root, "fan_num", &(info->fan_num), false);
 	root = api_add_int(root, "fan1", &(info->fan[0]), false);
 	root = api_add_int(root, "fan2", &(info->fan[1]), false);
 	root = api_add_int(root, "fan3", &(info->fan[2]), false);
 	root = api_add_int(root, "fan4", &(info->fan[3]), false);
+	root = api_add_int(root, "fan5", &(info->fan[4]), false);
+	root = api_add_int(root, "fan6", &(info->fan[5]), false);
+	root = api_add_int(root, "fan7", &(info->fan[6]), false);
+	root = api_add_int(root, "fan8", &(info->fan[7]), false);
+	root = api_add_int(root, "fan9", &(info->fan[8]), false);
+	root = api_add_int(root, "fan10", &(info->fan[9]), false);
+	root = api_add_int(root, "fan11", &(info->fan[10]), false);
+	root = api_add_int(root, "fan12", &(info->fan[11]), false);
+	root = api_add_int(root, "fan13", &(info->fan[12]), false);
+	root = api_add_int(root, "fan14", &(info->fan[13]), false);
+	root = api_add_int(root, "fan15", &(info->fan[14]), false);
+	root = api_add_int(root, "fan16", &(info->fan[15]), false);
 
 	root = api_add_int(root, "temp_num", &(info->temp_num), false);
 	root = api_add_int(root, "temp1", &(info->temp[0]), false);
 	root = api_add_int(root, "temp2", &(info->temp[1]), false);
 	root = api_add_int(root, "temp3", &(info->temp[2]), false);
 	root = api_add_int(root, "temp4", &(info->temp[3]), false);
+	root = api_add_int(root, "temp5", &(info->temp[4]), false);
+	root = api_add_int(root, "temp6", &(info->temp[5]), false);
+	root = api_add_int(root, "temp7", &(info->temp[6]), false);
+	root = api_add_int(root, "temp8", &(info->temp[7]), false);
+	root = api_add_int(root, "temp9", &(info->temp[8]), false);
+	root = api_add_int(root, "temp10", &(info->temp[9]), false);
+	root = api_add_int(root, "temp11", &(info->temp[10]), false);
+	root = api_add_int(root, "temp12", &(info->temp[11]), false);
+	root = api_add_int(root, "temp13", &(info->temp[12]), false);
+	root = api_add_int(root, "temp14", &(info->temp[13]), false);
+	root = api_add_int(root, "temp15", &(info->temp[14]), false);
+	root = api_add_int(root, "temp16", &(info->temp[15]), false);
 	root = api_add_int(root, "temp_avg", &(info->temp_avg), false);
 	root = api_add_int(root, "temp_max", &(info->temp_max), false);
 	root = api_add_percent(root, "Device Hardware%", &hwp, true);
@@ -1807,12 +2146,36 @@ static struct api_data *bitmain_api_stats(struct cgpu_info *cgpu)
 	root = api_add_int(root, "chain_acn2", &(info->chain_asic_num[1]), false);
 	root = api_add_int(root, "chain_acn3", &(info->chain_asic_num[2]), false);
 	root = api_add_int(root, "chain_acn4", &(info->chain_asic_num[3]), false);
+	root = api_add_int(root, "chain_acn5", &(info->chain_asic_num[4]), false);
+	root = api_add_int(root, "chain_acn6", &(info->chain_asic_num[5]), false);
+	root = api_add_int(root, "chain_acn7", &(info->chain_asic_num[6]), false);
+	root = api_add_int(root, "chain_acn8", &(info->chain_asic_num[7]), false);
+	root = api_add_int(root, "chain_acn9", &(info->chain_asic_num[8]), false);
+	root = api_add_int(root, "chain_acn10", &(info->chain_asic_num[9]), false);
+	root = api_add_int(root, "chain_acn11", &(info->chain_asic_num[10]), false);
+	root = api_add_int(root, "chain_acn12", &(info->chain_asic_num[11]), false);
+	root = api_add_int(root, "chain_acn13", &(info->chain_asic_num[12]), false);
+	root = api_add_int(root, "chain_acn14", &(info->chain_asic_num[13]), false);
+	root = api_add_int(root, "chain_acn15", &(info->chain_asic_num[14]), false);
+	root = api_add_int(root, "chain_acn16", &(info->chain_asic_num[15]), false);
 
 	//applog(LOG_ERR, "chain asic status:%s", info->chain_asic_status_t[0]);
 	root = api_add_string(root, "chain_acs1", info->chain_asic_status_t[0], false);
 	root = api_add_string(root, "chain_acs2", info->chain_asic_status_t[1], false);
 	root = api_add_string(root, "chain_acs3", info->chain_asic_status_t[2], false);
 	root = api_add_string(root, "chain_acs4", info->chain_asic_status_t[3], false);
+	root = api_add_string(root, "chain_acs5", info->chain_asic_status_t[4], false);
+	root = api_add_string(root, "chain_acs6", info->chain_asic_status_t[5], false);
+	root = api_add_string(root, "chain_acs7", info->chain_asic_status_t[6], false);
+	root = api_add_string(root, "chain_acs8", info->chain_asic_status_t[7], false);
+	root = api_add_string(root, "chain_acs9", info->chain_asic_status_t[8], false);
+	root = api_add_string(root, "chain_acs10", info->chain_asic_status_t[9], false);
+	root = api_add_string(root, "chain_acs11", info->chain_asic_status_t[10], false);
+	root = api_add_string(root, "chain_acs12", info->chain_asic_status_t[11], false);
+	root = api_add_string(root, "chain_acs13", info->chain_asic_status_t[12], false);
+	root = api_add_string(root, "chain_acs14", info->chain_asic_status_t[13], false);
+	root = api_add_string(root, "chain_acs15", info->chain_asic_status_t[14], false);
+	root = api_add_string(root, "chain_acs16", info->chain_asic_status_t[15], false);
 
 	//root = api_add_int(root, "chain_acs1", &(info->chain_asic_status[0]), false);
 	//root = api_add_int(root, "chain_acs2", &(info->chain_asic_status[1]), false);

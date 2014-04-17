@@ -256,7 +256,9 @@ extern unsigned char bit_swap_table[256];
 	DRIVER_ADD_COMMAND(hashfast) \
 	DRIVER_ADD_COMMAND(klondike) \
 	DRIVER_ADD_COMMAND(knc) \
+	DRIVER_ADD_COMMAND(drillbit) \
 	DRIVER_ADD_COMMAND(bab) \
+	DRIVER_ADD_COMMAND(minion) \
 	DRIVER_ADD_COMMAND(avalon) \
 	DRIVER_ADD_COMMAND(bitmain)
 
@@ -351,6 +353,9 @@ struct device_drv {
 	void (*hw_error)(struct thr_info *);
 	void (*thread_shutdown)(struct thr_info *);
 	void (*thread_enable)(struct thr_info *);
+
+	/* What should be zeroed in this device when global zero stats is sent */
+	void (*zero_stats)(struct cgpu_info *);
 
 	// Does it need to be free()d?
 	bool copy;
@@ -685,6 +690,7 @@ endian_flip128(void __maybe_unused *dest_p, const void __maybe_unused *src_p)
 }
 #endif
 
+extern double cgpu_runtime(struct cgpu_info *cgpu);
 extern void _quit(int status);
 
 /*
@@ -947,6 +953,13 @@ struct pool;
 #define API_MCAST_CODE "FTW"
 #define API_MCAST_ADDR "224.0.0.75"
 
+extern bool g_logfile_enable;
+extern char g_logfile_path[256];
+extern char g_logfile_openflag[32];
+extern FILE * g_logwork_file;
+extern FILE * g_logwork_files[65];
+extern FILE * g_logwork_diffs[65];
+extern int g_logwork_asicnum;
 extern bool opt_work_update;
 extern bool opt_protocol;
 extern bool have_longpoll;
@@ -958,6 +971,9 @@ extern bool opt_lowmem;
 extern bool opt_autofan;
 extern bool opt_autoengine;
 extern bool use_curses;
+extern char *opt_logwork_path;
+extern char *opt_logwork_asicnum;
+extern bool opt_logwork_diff;
 extern char *opt_api_allow;
 extern bool opt_api_mcast;
 extern char *opt_api_mcast_addr;
@@ -970,14 +986,21 @@ extern int opt_api_port;
 extern bool opt_api_listen;
 extern bool opt_api_network;
 extern bool opt_delaynet;
+extern time_t last_getwork;
 extern bool opt_restart;
+#ifdef USE_ICARUS
 extern char *opt_icarus_options;
 extern char *opt_icarus_timing;
+extern int opt_anu_freq;
+#endif
+#ifdef USE_BMSC
 extern char *opt_bmsc_options;
 extern char *opt_bmsc_timing;
+extern bool opt_bmsc_gray;
 extern char *opt_bmsc_freq;
 extern char *opt_bmsc_rdreg;
 extern bool opt_bmsc_rdworktest;
+#endif
 extern bool opt_worktime;
 #ifdef USE_AVALON
 extern char *opt_avalon_options;
@@ -986,9 +1009,19 @@ extern char *opt_bitburner_fury_options;
 #ifdef USE_BITMAIN
 extern char *opt_bitmain_options;
 extern bool opt_bitmain_hwerror;
+extern bool opt_bitmain_checkall;
+extern bool opt_bitmain_checkn2diff;
+extern bool opt_bitmain_beeper;
+extern bool opt_bitmain_tempoverctrl;
 #endif
 #ifdef USE_KLONDIKE
 extern char *opt_klondike_options;
+#endif
+#ifdef USE_DRILLBIT
+extern char *opt_drillbit_options;
+#endif
+#ifdef USE_BAB
+extern char *opt_bab_options;
 #endif
 #ifdef USE_USBUTILS
 extern char *opt_usb_select;
@@ -1044,6 +1077,7 @@ extern pthread_mutex_t restart_lock;
 extern pthread_cond_t restart_cond;
 
 extern void clear_stratum_shares(struct pool *pool);
+extern void clear_pool_work(struct pool *pool);
 extern void set_target(unsigned char *dest_target, double diff);
 extern int restart_wait(struct thr_info *thr, unsigned int mstime);
 
@@ -1089,6 +1123,7 @@ extern double total_mhashes_done;
 extern double g_displayed_rolling;
 extern unsigned int new_blocks;
 extern unsigned int found_blocks;
+extern int g_max_fan, g_max_temp;
 extern int total_accepted, total_rejected, total_diff1;;
 extern int total_getworks, total_stale, total_discarded;
 extern double total_diff_accepted, total_diff_rejected, total_diff_stale;
@@ -1220,7 +1255,7 @@ struct pool {
 	char *nonce1;
 	unsigned char *nonce1bin;
 	size_t n1_len;
-	uint32_t nonce2;
+	uint64_t nonce2;
 	int n2size;
 	char *sessionid;
 	bool has_stratum;
@@ -1296,7 +1331,7 @@ struct work {
 
 	bool		stratum;
 	char 		*job_id;
-	uint32_t	nonce2;
+	uint64_t	nonce2;
 	size_t		nonce2_len;
 	char		*ntime;
 	double		sdiff;
@@ -1369,12 +1404,16 @@ struct modminer_fpga_state {
 
 extern void get_datestamp(char *, size_t, struct timeval *);
 extern void inc_hw_errors(struct thr_info *thr);
+extern void inc_dev_status(int max_fan, int max_temp);
+extern void inc_work_stats(struct thr_info *thr, struct pool *pool, int diff1);
 extern bool test_nonce(struct work *work, uint32_t nonce);
 extern bool test_nonce_diff(struct work *work, uint32_t nonce, double diff);
-extern void submit_tested_work(struct thr_info *thr, struct work *work);
+extern bool submit_tested_work(struct thr_info *thr, struct work *work);
 extern bool submit_nonce(struct thr_info *thr, struct work *work, uint32_t nonce);
+extern bool submit_noffset_nonce(struct thr_info *thr, struct work *work, uint32_t nonce, int noffset);
 extern bool submit_nonce_1(struct thr_info *thr, struct work *work, uint32_t nonce, int * nofull);
 extern void submit_nonce_2(struct work *work);
+extern bool submit_nonce_direct(struct thr_info *thr, struct work *work, uint32_t nonce);
 extern bool submit_noffset_nonce(struct thr_info *thr, struct work *work, uint32_t nonce, int noffset);
 extern struct work *get_work(struct thr_info *thr, const int thr_id);
 extern void __add_queued(struct cgpu_info *cgpu, struct work *work);
@@ -1391,6 +1430,7 @@ extern void __work_completed(struct cgpu_info *cgpu, struct work *work);
 extern int age_queued_work(struct cgpu_info *cgpu, double secs);
 extern void work_completed(struct cgpu_info *cgpu, struct work *work);
 extern struct work *take_queued_work_bymidstate(struct cgpu_info *cgpu, char *midstate, size_t midstatelen, char *data, int offset, size_t datalen);
+extern void flush_queue(struct cgpu_info *cgpu);
 extern void hash_driver_work(struct thr_info *mythr);
 extern void hash_queued_work(struct thr_info *mythr);
 extern void _wlog(const char *str);
@@ -1435,6 +1475,7 @@ enum api_data_type {
 	API_INT,
 	API_UINT,
 	API_UINT32,
+	API_HEX32,
 	API_UINT64,
 	API_DOUBLE,
 	API_ELAPSED,
@@ -1449,7 +1490,8 @@ enum api_data_type {
 	API_VOLTS,
 	API_HS,
 	API_DIFF,
-	API_PERCENT
+	API_PERCENT,
+	API_AVG
 };
 
 struct api_data {
@@ -1469,6 +1511,7 @@ extern struct api_data *api_add_uint16(struct api_data *root, char *name, uint16
 extern struct api_data *api_add_int(struct api_data *root, char *name, int *data, bool copy_data);
 extern struct api_data *api_add_uint(struct api_data *root, char *name, unsigned int *data, bool copy_data);
 extern struct api_data *api_add_uint32(struct api_data *root, char *name, uint32_t *data, bool copy_data);
+extern struct api_data *api_add_hex32(struct api_data *root, char *name, uint32_t *data, bool copy_data);
 extern struct api_data *api_add_uint64(struct api_data *root, char *name, uint64_t *data, bool copy_data);
 extern struct api_data *api_add_double(struct api_data *root, char *name, double *data, bool copy_data);
 extern struct api_data *api_add_elapsed(struct api_data *root, char *name, double *data, bool copy_data);
@@ -1484,5 +1527,11 @@ extern struct api_data *api_add_volts(struct api_data *root, char *name, float *
 extern struct api_data *api_add_hs(struct api_data *root, char *name, double *data, bool copy_data);
 extern struct api_data *api_add_diff(struct api_data *root, char *name, double *data, bool copy_data);
 extern struct api_data *api_add_percent(struct api_data *root, char *name, double *data, bool copy_data);
+extern struct api_data *api_add_avg(struct api_data *root, char *name, float *data, bool copy_data);
+
+extern void rev(unsigned char *s, size_t l);
+extern int check_asicnum(int asic_num, unsigned char nonce);
+extern void cg_logwork(struct work *work, unsigned char *nonce_bin, bool ok);
+extern void cg_logwork_uint32(struct work *work, uint32_t nonce, bool ok);
 
 #endif /* __MINER_H__ */

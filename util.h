@@ -24,6 +24,10 @@
 	{
 		return (errno == ETIMEDOUT);
 	}
+	static inline bool interrupted(void)
+	{
+		return (errno == EINTR);
+	}
 #elif defined WIN32
 	#include <ws2tcpip.h>
 	#include <winsock2.h>
@@ -37,13 +41,19 @@
 	extern char *WSAErrorMsg(void);
 	#define SOCKERRMSG WSAErrorMsg()
 
+	/* Check for windows variants of the errors as well as when ming
+	 * decides to wrap the error into the errno equivalent. */
 	static inline bool sock_blocks(void)
 	{
-		return (WSAGetLastError() == WSAEWOULDBLOCK);
+		return (WSAGetLastError() == WSAEWOULDBLOCK || errno == EAGAIN);
 	}
 	static inline bool sock_timeout(void)
 	{
-		return (errno == WSAETIMEDOUT);
+		return (WSAGetLastError() == WSAETIMEDOUT || errno == ETIMEDOUT);
+	}
+	static inline bool interrupted(void)
+	{
+		return (WSAGetLastError() == WSAEINTR || errno == EINTR);
 	}
 	#ifndef SHUT_RDWR
 	#define SHUT_RDWR SD_BOTH
@@ -141,6 +151,10 @@ int _cgsem_mswait(cgsem_t *cgsem, int ms, const char *file, const char *func, co
 void cgsem_reset(cgsem_t *cgsem);
 void cgsem_destroy(cgsem_t *cgsem);
 bool cg_completion_timeout(void *fn, void *fnarg, int timeout);
+
+int tcp_open(char * ip, unsigned short port);
+int tcp_send(int s, unsigned char * data, int datalen);
+int tcp_recv(int s, unsigned char * buf, int buflen);
 
 #define cgsem_init(_sem) _cgsem_init(_sem, __FILE__, __func__, __LINE__)
 #define cgsem_post(_sem) _cgsem_post(_sem, __FILE__, __func__, __LINE__)
